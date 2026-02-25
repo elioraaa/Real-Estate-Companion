@@ -491,3 +491,31 @@
   margin-top: 12px;
   opacity: 0.8;
 }
+
+/* ── View toggle button (Grid / Map) ── */
+.apartments-viewToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1.5px solid rgba(11, 18, 32, 0.22);
+  border-radius: 8px;
+  background: #fff;
+  color: rgba(11, 18, 32, 0.8);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.apartments-viewToggle:hover {
+  border-color: #0b1220;
+  color: #0b1220;
+}
+
+.apartments-viewToggle--active {
+  background: #0b1220;
+  color: #fff;
+  border-color: #0b1220;
+}

@@ -6,6 +6,7 @@ import { useApartments } from "../components/hooks/useApartments";
 import SearchBar from "../components/apartaments/SearchBar";
 import FiltersBar from "../components/apartaments/FiltersBar";
 import ApartmentCard from "../components/apartaments/ApartmentCard";
+import MapView from "../components/apartaments/MapView";
 import { evaluateDeal, getEstimate } from "../services/estimatorService";
 import { useCompare } from "../context/CompareContext";
 import "../components/apartaments/apartments.css";
@@ -65,6 +66,7 @@ export default function ApartmentsPage() {
     terraceOnly: false,
   });
   const [sort, setSort] = useState("price-asc");
+  const [viewMode, setViewMode] = useState("grid");
   const [goodDealsOnly, setGoodDealsOnly] = useState(false);
   const [priceRange, setPriceRange] = useState(2200);
 
@@ -298,6 +300,13 @@ export default function ApartmentsPage() {
             <Link to="/tools/compare" className="apartments-compareNowBtn">
               Compare Now ({compareList.length}/3)
             </Link>
+            <button
+              type="button"
+              className={`apartments-viewToggle${viewMode === "map" ? " apartments-viewToggle--active" : ""}`}
+              onClick={() => setViewMode((v) => (v === "grid" ? "map" : "grid"))}
+            >
+              {viewMode === "grid" ? "Map View" : "Grid View"}
+            </button>
             <div className="apartments-filterGroup apartments-filterGroupInline">
               <label htmlFor="apartments-sort-inline">Sort</label>
               <select
@@ -325,42 +334,47 @@ export default function ApartmentsPage() {
 
         {!loading && !error ? (
           filteredApartments.length ? (
-            <section className="apartments-grid">
-              {visibleApartments.map((apartment) => {
-                const id = getListingId(apartment);
-                const estimate = estimatesById[id];
-                const deal = evaluateDeal(apartment.price, estimate?.estimatedPrice);
-                const isRealDeal = deal.isGoodDeal && estimate?.source === "api";
+            viewMode === "map" ? (
+              <MapView apartments={filteredApartments} estimatesById={estimatesById} />
+            ) : (
+              <>
+                <section className="apartments-grid">
+                  {visibleApartments.map((apartment) => {
+                    const id = getListingId(apartment);
+                    const estimate = estimatesById[id];
+                    const deal = evaluateDeal(apartment.price, estimate?.estimatedPrice);
+                    const isRealDeal = deal.isGoodDeal && estimate?.source === "api";
 
-                return (
-                  <ApartmentCard
-                    key={id}
-                    apartment={apartment}
-                    isGoodDeal={isRealDeal}
-                    savingsPercent={deal.savingsPercent}
-                    estimatedPrice={estimate?.estimatedPrice ?? null}
-                    isCompared={isCompared(apartment)}
-                    compareDisabled={!isCompared(apartment) && compareList.length >= 3}
-                    onToggleCompare={() => handleCompareToggle(apartment)}
-                  />
-                );
-              })}
-            </section>
+                    return (
+                      <ApartmentCard
+                        key={id}
+                        apartment={apartment}
+                        isGoodDeal={isRealDeal}
+                        savingsPercent={deal.savingsPercent}
+                        estimatedPrice={estimate?.estimatedPrice ?? null}
+                        isCompared={isCompared(apartment)}
+                        compareDisabled={!isCompared(apartment) && compareList.length >= 3}
+                        onToggleCompare={() => handleCompareToggle(apartment)}
+                      />
+                    );
+                  })}
+                </section>
+                {canLoadMore ? (
+                  <div className="apartments-loadMoreWrap">
+                    <button
+                      type="button"
+                      className="apartments-loadMoreMainBtn"
+                      onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                    >
+                      Load more
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            )
           ) : (
             <p className="apartments-empty">No apartments match the current filters.</p>
           )
-        ) : null}
-
-        {!loading && !error && canLoadMore ? (
-          <div className="apartments-loadMoreWrap">
-            <button
-              type="button"
-              className="apartments-loadMoreMainBtn"
-              onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-            >
-              Load more
-            </button>
-          </div>
         ) : null}
       </div>
     </motion.main>
