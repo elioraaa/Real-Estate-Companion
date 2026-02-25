@@ -32,8 +32,9 @@ function getListingId(listing) {
   return listing.id || listing._id;
 }
 
+const PAGE_SIZE = 24;
+
 export default function ApartmentsPage() {
-  const PAGE_SIZE = 24;
   const { apartments, loading, error } = useApartments();
   const { compareList, addToCompare, removeFromCompare } = useCompare();
 
@@ -82,7 +83,10 @@ export default function ApartmentsPage() {
         setLoadingEstimates(true);
         setEstimateError("");
 
-        const missingListings = apartments.filter((listing) => {
+        // Only fetch estimates for the current visible batch + one page ahead.
+        // This avoids firing N requests for all listings on initial load.
+        const fetchUpTo = Math.min(visibleCount + PAGE_SIZE, apartments.length);
+        const missingListings = apartments.slice(0, fetchUpTo).filter((listing) => {
           const id = getListingId(listing);
           return !estimatesById[id];
         });
@@ -112,7 +116,7 @@ export default function ApartmentsPage() {
     return () => {
       active = false;
     };
-  }, [apartments, estimatesById]);
+  }, [apartments, visibleCount, estimatesById]);
 
   function handleSearchChange(e) {
     const { name, value, type, checked } = e.target;
@@ -199,6 +203,7 @@ export default function ApartmentsPage() {
       const aptSqm = Number(apartment.size ?? apartment.meters) || 0;
       const estimate = estimatesById[getListingId(apartment)];
       const deal = evaluateDeal(apartment.price, estimate?.estimatedPrice);
+      const isRealDeal = deal.isGoodDeal && estimate?.source === "api";
 
       const matchesLocation = !location || aptLocation.includes(location);
       const matchesMinPrice = price >= minPrice;
@@ -211,7 +216,7 @@ export default function ApartmentsPage() {
       const matchesParking = !parkingOnly || apartment.hasParking === true;
       const matchesGarage = !garageOnly || apartment.hasGarage === true;
       const matchesTerrace = !terraceOnly || apartment.hasTerrace === true;
-      const matchesGoodDeals = !goodDealsOnly || deal.isGoodDeal;
+      const matchesGoodDeals = !goodDealsOnly || isRealDeal;
       const matchesRange = price <= priceRange;
 
       return (
@@ -325,12 +330,13 @@ export default function ApartmentsPage() {
                 const id = getListingId(apartment);
                 const estimate = estimatesById[id];
                 const deal = evaluateDeal(apartment.price, estimate?.estimatedPrice);
+                const isRealDeal = deal.isGoodDeal && estimate?.source === "api";
 
                 return (
                   <ApartmentCard
                     key={id}
                     apartment={apartment}
-                    isGoodDeal={deal.isGoodDeal}
+                    isGoodDeal={isRealDeal}
                     savingsPercent={deal.savingsPercent}
                     estimatedPrice={estimate?.estimatedPrice ?? null}
                     isCompared={isCompared(apartment)}

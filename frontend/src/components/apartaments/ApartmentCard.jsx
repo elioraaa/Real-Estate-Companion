@@ -32,11 +32,26 @@ export default function ApartmentCard({
         </div>
 
         <p className="apartments-meta">
-          {apartment.meters != null ? `${apartment.meters} m²` : "— m²"} ·{" "}
-          {apartment.rooms != null ? `${apartment.rooms} rooms` : "Rooms n/a"}
+          {apartment.meters != null ? `${apartment.meters} m²` : "— m²"}
+          {apartment.rooms != null ? ` · ${apartment.rooms} bed` : ""}
+          {apartment.bathrooms > 0 ? ` · ${apartment.bathrooms} bath` : ""}
+          {apartment.floor > 0 ? ` · Floor ${apartment.floor}` : ""}
+          {apartment.meters > 0 && apartment.price > 0
+            ? ` · ${Math.round(apartment.price / apartment.meters).toLocaleString()} €/m²`
+            : ""}
         </p>
+
+        {(apartment.hasElevator || apartment.hasParking || apartment.hasGarage || apartment.hasTerrace) ? (
+          <div className="apartments-chips">
+            {apartment.hasElevator ? <span className="apartments-chip">Elevator</span> : null}
+            {apartment.hasParking ? <span className="apartments-chip">Parking</span> : null}
+            {apartment.hasGarage ? <span className="apartments-chip">Garage</span> : null}
+            {apartment.hasTerrace ? <span className="apartments-chip">Terrace</span> : null}
+          </div>
+        ) : null}
+
         {typeof estimatedPrice === "number" ? (
-          <p className="apartments-meta">Estimated: {Math.round(estimatedPrice)} €</p>
+          <p className="apartments-meta">Estimated: {Math.round(estimatedPrice).toLocaleString()} €</p>
         ) : null}
 
         <p className={`apartments-desc ${expanded ? "is-expanded" : ""}`}>{description}</p>
