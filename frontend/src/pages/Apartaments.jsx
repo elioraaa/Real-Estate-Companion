@@ -16,7 +16,15 @@ function toEstimatePayload(listing) {
     price: listing.price,
     size: listing.size ?? listing.meters,
     rooms: listing.rooms,
+    bathrooms: listing.bathrooms,
+    floor: listing.floor,
     location: listing.location,
+    lat: listing.lat,
+    lng: listing.lng,
+    hasElevator: listing.hasElevator,
+    hasParking: listing.hasParking,
+    hasGarage: listing.hasGarage,
+    hasTerrace: listing.hasTerrace,
   };
 }
 
@@ -38,6 +46,9 @@ export default function ApartmentsPage() {
     minSqm: "",
     maxSqm: "",
     elevatorOnly: false,
+    parkingOnly: false,
+    garageOnly: false,
+    terraceOnly: false,
   });
   const [appliedSearch, setAppliedSearch] = useState({
     location: "",
@@ -48,6 +59,9 @@ export default function ApartmentsPage() {
     minSqm: "",
     maxSqm: "",
     elevatorOnly: false,
+    parkingOnly: false,
+    garageOnly: false,
+    terraceOnly: false,
   });
   const [sort, setSort] = useState("price-asc");
   const [goodDealsOnly, setGoodDealsOnly] = useState(false);
@@ -124,6 +138,9 @@ export default function ApartmentsPage() {
       minSqm: "",
       maxSqm: "",
       elevatorOnly: false,
+      parkingOnly: false,
+      garageOnly: false,
+      terraceOnly: false,
     };
     setSearchValues(cleared);
     setAppliedSearch(cleared);
@@ -170,6 +187,9 @@ export default function ApartmentsPage() {
     const minSqm = Number(appliedSearch.minSqm) || 0;
     const maxSqm = Number(appliedSearch.maxSqm) || Number.POSITIVE_INFINITY;
     const elevatorOnly = Boolean(appliedSearch.elevatorOnly);
+    const parkingOnly = Boolean(appliedSearch.parkingOnly);
+    const garageOnly = Boolean(appliedSearch.garageOnly);
+    const terraceOnly = Boolean(appliedSearch.terraceOnly);
 
     const base = apartments.filter((apartment) => {
       const aptLocation = (apartment.location || "").toLowerCase();
@@ -188,6 +208,9 @@ export default function ApartmentsPage() {
       const matchesSqm = aptSqm >= minSqm;
       const matchesMaxSqm = aptSqm <= maxSqm;
       const matchesElevator = !elevatorOnly || apartment.hasElevator === true;
+      const matchesParking = !parkingOnly || apartment.hasParking === true;
+      const matchesGarage = !garageOnly || apartment.hasGarage === true;
+      const matchesTerrace = !terraceOnly || apartment.hasTerrace === true;
       const matchesGoodDeals = !goodDealsOnly || deal.isGoodDeal;
       const matchesRange = price <= priceRange;
 
@@ -200,6 +223,9 @@ export default function ApartmentsPage() {
         matchesSqm &&
         matchesMaxSqm &&
         matchesElevator &&
+        matchesParking &&
+        matchesGarage &&
+        matchesTerrace &&
         matchesGoodDeals &&
         matchesRange
       );
@@ -209,7 +235,16 @@ export default function ApartmentsPage() {
     sorted.sort((a, b) => {
       const aPrice = Number(a.price) || 0;
       const bPrice = Number(b.price) || 0;
-      return sort === "price-desc" ? bPrice - aPrice : aPrice - bPrice;
+      const aSqm = Number(a.size ?? a.meters) || 0;
+      const bSqm = Number(b.size ?? b.meters) || 0;
+      const aPpm = aSqm > 0 ? aPrice / aSqm : 0;
+      const bPpm = bSqm > 0 ? bPrice / bSqm : 0;
+      if (sort === "price-desc") return bPrice - aPrice;
+      if (sort === "size-asc") return aSqm - bSqm;
+      if (sort === "size-desc") return bSqm - aSqm;
+      if (sort === "ppm-asc") return aPpm - bPpm;
+      if (sort === "ppm-desc") return bPpm - aPpm;
+      return aPrice - bPrice; // default: price-asc
     });
     return sorted;
   }, [apartments, appliedSearch, sort, goodDealsOnly, priceRange, estimatesById]);
@@ -267,6 +302,10 @@ export default function ApartmentsPage() {
               >
                 <option value="price-asc">Price: low to high</option>
                 <option value="price-desc">Price: high to low</option>
+                <option value="size-asc">Size: small to large</option>
+                <option value="size-desc">Size: large to small</option>
+                <option value="ppm-asc">Price/m²: low to high</option>
+                <option value="ppm-desc">Price/m²: high to low</option>
               </select>
             </div>
           </div>
@@ -292,6 +331,7 @@ export default function ApartmentsPage() {
                     key={id}
                     apartment={apartment}
                     isGoodDeal={deal.isGoodDeal}
+                    savingsPercent={deal.savingsPercent}
                     estimatedPrice={estimate?.estimatedPrice ?? null}
                     isCompared={isCompared(apartment)}
                     compareDisabled={!isCompared(apartment) && compareList.length >= 3}

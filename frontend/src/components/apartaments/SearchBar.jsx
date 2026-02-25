@@ -99,7 +99,37 @@ export default function SearchBar({ values, onChange, onSubmit, onClear }) {
             checked={Boolean(values.elevatorOnly)}
             onChange={onChange}
           />
-          <span>Elevator only</span>
+          <span>Elevator</span>
+        </label>
+
+        <label className="apartments-toggle apartments-toggleInline">
+          <input
+            type="checkbox"
+            name="parkingOnly"
+            checked={Boolean(values.parkingOnly)}
+            onChange={onChange}
+          />
+          <span>Parking</span>
+        </label>
+
+        <label className="apartments-toggle apartments-toggleInline">
+          <input
+            type="checkbox"
+            name="garageOnly"
+            checked={Boolean(values.garageOnly)}
+            onChange={onChange}
+          />
+          <span>Garage</span>
+        </label>
+
+        <label className="apartments-toggle apartments-toggleInline">
+          <input
+            type="checkbox"
+            name="terraceOnly"
+            checked={Boolean(values.terraceOnly)}
+            onChange={onChange}
+          />
+          <span>Terrace</span>
         </label>
 
         <div className="apartments-searchActions">

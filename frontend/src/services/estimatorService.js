@@ -9,7 +9,15 @@ function getCacheKey(payload) {
     price: payload.price,
     size: payload.size,
     rooms: payload.rooms,
+    bathrooms: payload.bathrooms,
+    floor: payload.floor,
     location: payload.location,
+    lat: payload.lat,
+    lng: payload.lng,
+    hasElevator: payload.hasElevator,
+    hasParking: payload.hasParking,
+    hasGarage: payload.hasGarage,
+    hasTerrace: payload.hasTerrace,
   });
 }
 
@@ -32,6 +40,8 @@ function mockEstimate(payload) {
   };
 }
 
+const GOOD_DEAL_THRESHOLD = 0.05; // listing must be at least 5% below estimate
+
 export function evaluateDeal(listingPrice, estimatedPrice) {
   const listPrice = Number(listingPrice);
   const estimate = Number(estimatedPrice);
@@ -41,16 +51,19 @@ export function evaluateDeal(listingPrice, estimatedPrice) {
       isGoodDeal: false,
       diffValue: 0,
       diffPercent: 0,
+      savingsPercent: 0,
     };
   }
 
   const diffValue = listPrice - estimate;
   const diffPercent = (diffValue / estimate) * 100;
+  const savingsPercent = Math.abs(diffPercent);
 
   return {
-    isGoodDeal: listPrice < estimate,
+    isGoodDeal: listPrice <= estimate * (1 - GOOD_DEAL_THRESHOLD),
     diffValue,
     diffPercent,
+    savingsPercent,
   };
 }
 
@@ -60,7 +73,15 @@ export async function getEstimate(payload) {
     price: payload.price,
     size: payload.size ?? payload.meters ?? 0,
     rooms: payload.rooms ?? 0,
+    bathrooms: payload.bathrooms ?? undefined,
+    floor: payload.floor ?? undefined,
     location: payload.location ?? "",
+    lat: payload.lat ?? undefined,
+    lng: payload.lng ?? undefined,
+    hasElevator: payload.hasElevator ?? undefined,
+    hasParking: payload.hasParking ?? undefined,
+    hasGarage: payload.hasGarage ?? undefined,
+    hasTerrace: payload.hasTerrace ?? undefined,
   };
 
   const cacheKey = getCacheKey(normalizedPayload);

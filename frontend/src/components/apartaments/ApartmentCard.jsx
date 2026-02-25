@@ -5,6 +5,7 @@ import "./apartments.css";
 export default function ApartmentCard({
   apartment,
   isGoodDeal = false,
+  savingsPercent = 0,
   estimatedPrice = null,
   isCompared = false,
   compareDisabled = false,
@@ -20,7 +21,11 @@ export default function ApartmentCard({
   return (
     <article className="apartments-card card-hover">
       <div className="apartments-cardBody">
-        {isGoodDeal ? <span className="apartments-dealBadge apartments-dealBadgeInline">🔥 Below Market</span> : null}
+        {isGoodDeal ? (
+          <span className="apartments-dealBadge apartments-dealBadgeInline">
+            🔥 {savingsPercent > 0 ? `${Math.round(savingsPercent)}% ` : ""}Below Market
+          </span>
+        ) : null}
         <div className="apartments-topRow">
           <h3 className="apartments-price">{apartment.price != null ? `${apartment.price} €` : "— €"}</h3>
           <p className="apartments-location">{apartment.location || "Location unavailable"}</p>
