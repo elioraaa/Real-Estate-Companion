@@ -3,9 +3,15 @@ export type EstimateRequest = {
   price?: number;
   size: number;
   rooms?: number;
+  bathrooms?: number;
+  floor?: number;
   location?: string;
   lat?: number;
   lng?: number;
+  hasElevator?: boolean;
+  hasParking?: boolean;
+  hasGarage?: boolean;
+  hasTerrace?: boolean;
 };
 
 export type EstimateResponse = {

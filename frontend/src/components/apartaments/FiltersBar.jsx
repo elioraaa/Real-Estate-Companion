@@ -18,6 +18,10 @@ export default function FiltersBar({
         <select id="apartments-sort" value={sort} onChange={onSortChange}>
           <option value="price-asc">Price: low to high</option>
           <option value="price-desc">Price: high to low</option>
+          <option value="size-asc">Size: small to large</option>
+          <option value="size-desc">Size: large to small</option>
+          <option value="ppm-asc">Price/m²: low to high</option>
+          <option value="ppm-desc">Price/m²: high to low</option>
         </select>
       </div>
 
