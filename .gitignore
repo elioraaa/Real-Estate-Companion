@@ -26,6 +26,9 @@ __pycache__/
 !ml/tirana_house_prices.json
 !backend/package.json
 !backend/package-lock.json
+!backend/nest-cli.json
+!backend/tsconfig.json
+!backend/tsconfig.build.json
 !frontend/package.json
 !frontend/package-lock.json
 
